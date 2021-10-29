@@ -39,18 +39,18 @@ target_link_libraries(TestEm18 ${Geant4_LIBRARIES} )
 # build TestEm18. This is so that we can run the executable directly because it
 # relies on these scripts being in the current working directory.
 #
-set(TestEm18_SCRIPTS
-    csda.mac edep.mac electron.mac ion.mac muon.mac pixe.mac proton.mac
-    TestEm18.in vis.mac plotHisto.C pixe.C
-   )
+# set(TestEm18_SCRIPTS
+#     csda.mac edep.mac electron.mac ion.mac muon.mac pixe.mac proton.mac
+#     TestEm18.in vis.mac plotHisto.C pixe.C
+#    )
 
-foreach(_script ${TestEm18_SCRIPTS})
-  configure_file(
-    ${PROJECT_SOURCE_DIR}/${_script}
-    ${PROJECT_BINARY_DIR}/${_script}
-    COPYONLY
-    )
-endforeach()
+# foreach(_script ${TestEm18_SCRIPTS})
+#   configure_file(
+#     ${PROJECT_SOURCE_DIR}/${_script}
+#     ${PROJECT_BINARY_DIR}/${_script}
+#     COPYONLY
+#     )
+# endforeach()
 
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX

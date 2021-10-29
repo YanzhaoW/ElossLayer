@@ -53,7 +53,7 @@
 #update geometry:
 #/layer/update
 
-/gun/particle proton
-/gun/energy 10 MeV
+/gun/particle alpha
+/gun/energy 14.5 MeV
 /run/printProgress 10000
 /run/beamOn 100000
