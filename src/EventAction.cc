@@ -36,12 +36,13 @@
 #include "HistoManager.hh"
 
 #include "G4Event.hh"
-
+#include <algorithm>
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 EventAction::EventAction(RunAction* RA)
 :G4UserEventAction(),fRunAction(RA)
-{}
+{
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -54,6 +55,10 @@ void EventAction::BeginOfEventAction(const G4Event*)
 {
  // initialisation per event
  fEdepPrimary = fEdepSecondary = 0.;
+ LayerNames = fRunAction->GetLayerNames();  
+ for(const auto &it : LayerNames){
+  VolEdep[it] = 0*MeV;
+ }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -81,6 +86,12 @@ void EventAction::SumEnergyTransfered(const G4VProcess* process,G4double energy)
   fProcessSubType[procName] = subtype;
 }
 
+    
+void EventAction::VolumeEnergyTrans(G4String vol, G4double edep){
+  if(std::find(LayerNames.begin(), LayerNames.end(), vol) != LayerNames.end()){
+   VolEdep[vol] += edep;
+  }
+}
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void EventAction::EndOfEventAction(const G4Event*)
@@ -94,12 +105,6 @@ void EventAction::EndOfEventAction(const G4Event*)
     G4double energy   = it->second;
     fRunAction->EnergyTransferedByProcess(procName, energy);
     EtransferedTotal += energy;
-    //
-    G4int ih = 0;
-    if(fProcessSubType[procName] == 2) ih = 3;
-    else if(fProcessSubType[procName] == 3) ih = 4;
-    else if(fProcessSubType[procName] == 4) ih = 5;
-    if (ih > 0) analysisManager->FillH1(ih, energy);
  }
 
  fRunAction->EnergyDeposited(fEdepPrimary, fEdepSecondary);
@@ -110,12 +115,11 @@ void EventAction::EndOfEventAction(const G4Event*)
  fRunAction->TotalEnergyDeposit(energyDepositTotal);
  
 
- analysisManager->FillH1( 2, fEdepPrimary);
- analysisManager->FillH1( 6, EtransferedTotal);
- analysisManager->FillH1( 7, energyLostTotal);
- analysisManager->FillH1( 9, fEdepSecondary);
- analysisManager->FillH1(10, energyDepositTotal);
- 
+ for(unsigned int i = 0; i<LayerNames.size(); i++){
+   analysisManager->FillNtupleDColumn(i, VolEdep[LayerNames[i]]); 
+ }
+ analysisManager->AddNtupleRow();
+  // G4cout << "--------end of event" << G4endl;
  fEnergyTransfered.clear();
  fProcessSubType.clear();
 }

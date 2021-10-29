@@ -1,32 +1,59 @@
-#
-# macro file for TestEm18.cc
-#
 /control/cout/ignoreThreadsExcept 0
 /control/verbose 2
 /run/verbose 1
-#
-/testem/det/setMat Water
-/testem/det/setSize 10 cm
-#
+
 /run/setCut 100 um
-#
 /process/em/verbose 0
-/process/em/printParameters 
-#
+/process/em/printParameters
 /run/initialize
-#
-/gun/particle proton 
-/gun/energy 1 GeV
-#
-/analysis/setFileName proton
-#
-/analysis/h1/set 1 100 0 10 cm	  #step size
-/analysis/h1/set 2 100 0 40 MeV  #continuous Edeposited 
-/analysis/h1/set 3 100 0 40 MeV  #Etransfered by ionisation
-/analysis/h1/set 6 100 0 40 MeV  #total Etransfered
-/analysis/h1/set 7 100 0 40 MeV  #total Elost
-/analysis/h1/set 8 100 0 40 MeV  #energy balance
-/analysis/h1/set 12 100 0 5 MeV  #e- energy spectrum
-#
+
+
+#adding layers here:
+
+/layer/SetName Mn_1
+/layer/SetMat G4_Mn
+/layer/AddLayer 0.998e-3 mm
+
+/layer/SetName 172Yb_1
+/layer/SetMat G4_Mn
+/layer/AddLayer 0.4e-3 mm
+
+/layer/SetName Al_1
+/layer/SetMat Aluminium
+/layer/AddLayer 7e-3 mm
+
+/layer/shift 2 mm
+
+/layer/SetName Mn_2
+/layer/SetMat G4_Mn
+/layer/AddLayer 0.998e-3 mm
+
+/layer/SetName 172Yb_2
+/layer/SetMat G4_Mn
+/layer/AddLayer 0.4e-3 mm
+
+/layer/SetName Al_2
+/layer/SetMat Aluminium
+/layer/AddLayer 7e-3 mm
+
+/layer/shift 2 mm
+
+/layer/SetName Mn_3
+/layer/SetMat G4_Mn
+/layer/AddLayer 0.998e-3 mm
+
+/layer/SetName 172Yb_3
+/layer/SetMat G4_Mn
+/layer/AddLayer 0.4e-3 mm
+
+/layer/SetName Al_3
+/layer/SetMat Aluminium
+/layer/AddLayer 7e-3 mm
+
+#update geometry:
+#/layer/update
+
+/gun/particle proton
+/gun/energy 10 MeV
 /run/printProgress 10000
 /run/beamOn 100000

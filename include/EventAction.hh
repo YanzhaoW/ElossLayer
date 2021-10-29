@@ -36,6 +36,7 @@
 #include "G4UserEventAction.hh"
 #include "globals.hh"
 #include <map>
+#include <vector>
 
 class RunAction;
 class G4VProcess;
@@ -54,10 +55,12 @@ class EventAction : public G4UserEventAction
     
     void SumEnergyDeposited(G4int trackID, G4double edep);
     void SumEnergyTransfered(const G4VProcess*, G4double);
+    void VolumeEnergyTrans(G4String vol, G4double edep);
 
   private:
     RunAction*    fRunAction;
-    
+    std::vector<G4String> LayerNames;
+    std::map<G4String, G4double> VolEdep;
     G4double      fEdepPrimary, fEdepSecondary;
     std::map<G4String,G4double> fEnergyTransfered;
     std::map<G4String,G4int> fProcessSubType;

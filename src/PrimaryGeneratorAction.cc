@@ -50,7 +50,7 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* det)
            = G4ParticleTable::GetParticleTable()->FindParticle("e-");
   fParticleGun->SetParticleDefinition(particle);
   fParticleGun->SetParticleEnergy(10*MeV);    
-  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(1.,0.,0.));
+  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -65,17 +65,7 @@ PrimaryGeneratorAction::~PrimaryGeneratorAction()
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
   //this function is called at the begining of event
-  //
-  G4double halfSize = 0.5*(fDetector->GetSize());
-  G4double x0 = - halfSize;
-  
-  //randomize (y0,z0)
-  //
-  G4double beam = 0.8*halfSize; 
-  G4double y0 = (2*G4UniformRand()-1.)*beam;
-  G4double z0 = (2*G4UniformRand()-1.)*beam;
-  
-  fParticleGun->SetParticlePosition(G4ThreeVector(x0,y0,z0));
+  fParticleGun->SetParticlePosition(G4ThreeVector(0.0,0.0,0.0));
   fParticleGun->GeneratePrimaryVertex(anEvent);
 }
 

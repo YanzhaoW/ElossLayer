@@ -55,13 +55,13 @@ class DetectorMessenger: public G4UImessenger
     
   private:
   
-    DetectorConstruction*      fDetector;
-    
-    G4UIdirectory*             fTestemDir;
-    G4UIdirectory*             fDetDir;    
-    G4UIcmdWithAString*        fMaterCmd;
-    G4UIcmdWithADoubleAndUnit* fSizeCmd;
-    G4UIcmdWithoutParameter*   fUpdateCmd;
+    DetectorConstruction*       fDetector;
+    G4UIdirectory*              fLayerDir;    
+    G4UIcmdWithAString*         fSetLayerName;
+    G4UIcmdWithAString*         fSetLayerMaterial;
+    G4UIcmdWithADoubleAndUnit*  fAddLayer;
+    G4UIcmdWithADoubleAndUnit*  fShiftDis;
+    G4UIcmdWithoutParameter*    fUpdateCmd;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

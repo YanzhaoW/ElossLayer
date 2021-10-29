@@ -59,7 +59,7 @@ void TrackingAction::PostUserTrackingAction(const G4Track* track)
     G4double Ekin2 = track->GetKineticEnergy();
     G4double dElost = fEkin1 - Ekin2;
     fRunAction->EnergyBalance(dElost);
-    G4AnalysisManager::Instance()->FillH1(8,dElost);
+    // G4AnalysisManager::Instance()->FillH1(8,dElost);
   }
 }
 

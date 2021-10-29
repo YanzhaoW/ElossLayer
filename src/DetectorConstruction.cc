@@ -38,162 +38,92 @@
 #include "G4Box.hh"
 #include "G4LogicalVolume.hh"
 #include "G4PVPlacement.hh"
+#include "G4NistManager.hh"
+#include "G4VisAttributes.hh"
 
 #include "G4GeometryManager.hh"
 #include "G4PhysicalVolumeStore.hh"
 #include "G4LogicalVolumeStore.hh"
 #include "G4SolidStore.hh"
 
-#include "G4UnitsTable.hh"
-#include "G4SystemOfUnits.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction()
-:G4VUserDetectorConstruction(),fPBox(0), fLBox(0), fMaterial(0),
- fDetectorMessenger(0)
+:G4VUserDetectorConstruction(),worldPV(0), worldLV(0), 
+ fDetectorMessenger(0),fLayerName(""), fLayerMat("")
 {
-  fBoxSize = 1*cm;
   DefineMaterials();
-  SetMaterial("Water");  
   fDetectorMessenger = new DetectorMessenger(this);
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::~DetectorConstruction()
 { delete fDetectorMessenger;}
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
   return ConstructVolumes();
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void DetectorConstruction::DefineMaterials()
 {
-  //
-  // define Elements
-  //
-  G4double z,a;
-  
-  G4Element* H  = new G4Element("Hydrogen" ,"H" , z= 1., a=   1.01*g/mole);
-  G4Element* N  = new G4Element("Nitrogen" ,"N" , z= 7., a=  14.01*g/mole);
-  G4Element* O  = new G4Element("Oxygen"   ,"O" , z= 8., a=  16.00*g/mole);
-  
-  //
   // define materials
-  //
-  G4double density;
-  G4int ncomponents, natoms;
-  G4double fractionmass;  
-  
-  G4Material* Air = 
-  new G4Material("Air", density= 1.290*mg/cm3, ncomponents=2);
-  Air->AddElement(N, fractionmass=70.*perCent);
-  Air->AddElement(O, fractionmass=30.*perCent);
+  G4NistManager* nistManager = G4NistManager::Instance();
+  nistManager->FindOrBuildMaterial("G4_Mn");
 
-  G4Material* H2O = 
-  new G4Material("Water", density= 1.000*g/cm3, ncomponents=2);
-  H2O->AddElement(H, natoms=2);
-  H2O->AddElement(O, natoms=1);
-  H2O->GetIonisation()->SetMeanExcitationEnergy(78.0*eV);
-  
-  G4Material* vapor = 
-  new G4Material("Water_vapor", density= 1.000*mg/cm3, ncomponents=2);
-  vapor->AddElement(H, natoms=2);
-  vapor->AddElement(O, natoms=1);
-  vapor->GetIonisation()->SetMeanExcitationEnergy(78.0*eV);
-  
-  new G4Material("Carbon"     , z=6.,  a= 12.01*g/mole, density= 2.267*g/cm3);
+  G4double z,a,density;
+  new G4Material("Galactic", 1, 1.01 * g / mole, CLHEP::universe_mean_density, kStateGas, 2.73 * kelvin, 3.e-18 * pascal);
   new G4Material("Aluminium"  , z=13., a= 26.98*g/mole, density= 2.700*g/cm3);
-  new G4Material("Silicon"    , z=14., a= 28.09*g/mole, density= 2.330*g/cm3);
-  new G4Material("liquidArgon", z=18., a= 39.95*g/mole, density= 1.390*g/cm3);
-  new G4Material("Iron"       , z=26., a= 55.85*g/mole, density= 7.870*g/cm3);  
-  new G4Material("Germanium"  , z=32., a= 72.61*g/mole, density= 5.323*g/cm3);
-  new G4Material("Tungsten"   , z=74., a=183.85*g/mole, density= 19.30*g/cm3);
-  new G4Material("Lead"       , z=82., a=207.19*g/mole, density= 11.35*g/cm3);
-  
-  new G4Material("ArgonGas"   , z=18., a=39.948*g/mole, density= 1.782*mg/cm3,
-                 kStateGas, 273.15*kelvin, 1*atmosphere);
+  new G4Material("Yb-170", z=70., a=170.0 * g/mole, density = 170.0/173.045*6.9*g/cm3);
+  new G4Material("Yb-172", z=70., a=172.0 * g/mole, density = 172.0/173.045*6.9*g/cm3);
                  
-  ////G4cout << *(G4Material::GetMaterialTable()) << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 {
-  // Cleanup old geometry
-  G4GeometryManager::GetInstance()->OpenGeometry();
-  G4PhysicalVolumeStore::GetInstance()->Clean();
-  G4LogicalVolumeStore::GetInstance()->Clean();
-  G4SolidStore::GetInstance()->Clean();
 
-  G4Box*
-  sBox = new G4Box("Container",                              //its name
-                   fBoxSize/2,fBoxSize/2,fBoxSize/2);        //its dimensions
+  // World
+  const G4double worldSizeXYZ = 5. * m / 2;
+  auto worldS = new G4Box("World", worldSizeXYZ, worldSizeXYZ, worldSizeXYZ);
+  worldLV = new G4LogicalVolume(worldS, G4Material::GetMaterial("Galactic"), "World");
+  worldLV->SetVisAttributes(G4VisAttributes::Invisible);
 
-  fLBox = new G4LogicalVolume(sBox,                        //its shape
-                             fMaterial,                    //its material
-                             fMaterial->GetName());        //its name
+  // Addlayer("Mn","G4_Mn", 0.998e-3*mm);
+  // Addlayer("Yb-172","Yb-172", 0.4e-3*mm);
+  // Addlayer("Al","Aluminium", 7e-3*mm);
 
-  fPBox = new G4PVPlacement(0,                          //no rotation
-                             G4ThreeVector(),           //at (0,0,0)
-                           fLBox,                       //its logical volume
-                           fMaterial->GetName(),        //its name
-                           0,                           //its mother  volume
-                           false,                       //no boolean operation
-                           0);                          //copy number
-                           
-  PrintParameters();
-  
-  //always return the root volume
-  //
-  return fPBox;
+ G4cout <<"++++++++++++++++++----------------------" << G4endl;
+  worldPV = new G4PVPlacement(nullptr, G4ThreeVector(), worldLV, "World", nullptr, false, 0, fCheckOverlaps);
+  return worldPV;
 }
 
+void DetectorConstruction::Addlayer(G4String name, G4String pMaterial, G4double thickness){
+  fLayerName = name;
+  fLayerMat = pMaterial;
+  Addlayer(thickness);
+}
+
+void DetectorConstruction::Addlayer(G4double thickness){
+  G4cout << "thickness: "<<thickness <<G4endl;
+  G4cout << "material: "<<fLayerMat <<G4endl;
+  auto layerS = new G4Box("layer", 2*cm, 2*cm, thickness/2);
+  auto layerLV = new G4LogicalVolume(layerS, G4Material::GetMaterial(fLayerMat), "layer");
+  layerLV->SetVisAttributes(G4VisAttributes(true));
+  layer_count++;
+  fPos += thickness/2;
+  new G4PVPlacement(nullptr, G4ThreeVector(0.0, 0.0, fPos),
+                  layerLV, fLayerName, worldLV, false, 0, fCheckOverlaps);
+  fPos += thickness/2;
+  LayerNames.push_back(fLayerName); 
+  UpdateGeometry();
+}
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void DetectorConstruction::PrintParameters()
-{
-  G4cout << "\n The Box is " << G4BestUnit(fBoxSize,"Length")
-         << " of " << fMaterial->GetName() 
-         << "\n "  << fMaterial << G4endl;
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void DetectorConstruction::SetMaterial(const G4String& name)
-{
-  // search the material by its name
-  G4Material* mat = G4Material::GetMaterial(name, false);
-
-  // create the material by its name
-  if(!mat) { mat = G4NistManager::Instance()->FindOrBuildMaterial(name); }
-
-  if(mat && mat != fMaterial) {
-    G4cout << "### New material " << mat->GetName() << G4endl;
-    fMaterial = mat;
-    UpdateGeometry();
-  }
-
-  if(!mat) {
-    G4cout << "\n--> warning from DetectorConstruction::SetMaterial : "
-           << name << " not found" << G4endl;  
-  } 
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void DetectorConstruction::SetSize(G4double value)
-{
-  fBoxSize = value;
-  UpdateGeometry();  
-}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -205,3 +135,11 @@ void DetectorConstruction::UpdateGeometry()
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+G4double DetectorConstruction::GetSize(){
+  return 5.0*m/2;
+}      
+
+G4Material* DetectorConstruction::GetMaterial(){
+  return G4Material::GetMaterial("Galactic");
+}

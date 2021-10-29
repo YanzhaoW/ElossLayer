@@ -56,13 +56,17 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 {
  // energy continuously deposited along trajectory
  //
- G4int trackID = step->GetTrack()->GetTrackID();
+ auto track = step->GetTrack();
+ G4int trackID = track->GetTrackID();
  G4double Edep = step->GetTotalEnergyDeposit();
  if (Edep > 0.) fEventaction->SumEnergyDeposited(trackID, Edep);
  
  // the rest for primary track only
  if (trackID > 1) return;
  
+//  G4cout << step->GetTrack() -> GetVolume()->GetName() << "\t" << step->GetTotalEnergyDeposit() <<
+//             "\t"<< step->GetTrack()->GetPosition().getX()<<G4endl;
+if (Edep > 0.) fEventaction->VolumeEnergyTrans(track->GetVolume()->GetName(), step->GetTotalEnergyDeposit());
  // count processes
  //
  const G4StepPoint* endPoint = step->GetPostStepPoint();
@@ -77,7 +81,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
  //
  G4double stepSize = step->GetStepLength();  
  fRunaction->TrackLength(stepSize);
- G4AnalysisManager::Instance()->FillH1(1,stepSize);
+//  G4AnalysisManager::Instance()->FillH1(1,stepSize);
 
  if (nbsec == 0) return;      // no secondary particles
 
@@ -92,11 +96,11 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
     G4String name = particle->GetParticleName();
     G4double energy = trk->GetKineticEnergy();
     fRunaction->EnergySpectrumOfSecondaries(name,energy);
-    G4int ih = 0; 
-         if (particle == G4Gamma::Gamma())       ih = 11;
-    else if (particle == G4Electron::Electron()) ih = 12;
-    else if (particle == G4Positron::Positron()) ih = 13;
-    if (ih > 0) G4AnalysisManager::Instance()->FillH1(ih,energy);
+   //  G4int ih = 0; 
+   //       if (particle == G4Gamma::Gamma())       ih = 11;
+   //  else if (particle == G4Electron::Electron()) ih = 12;
+   //  else if (particle == G4Positron::Positron()) ih = 13;
+   //  if (ih > 0) G4AnalysisManager::Instance()->FillH1(ih,energy);
     if (subtype == 4) energy = trk->GetTotalEnergy();   //(e+,e-) production
     Etransfer += energy;
  }

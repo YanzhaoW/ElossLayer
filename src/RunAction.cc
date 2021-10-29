@@ -34,6 +34,7 @@
 #include "DetectorConstruction.hh"
 #include "PrimaryGeneratorAction.hh"
 #include "HistoManager.hh"
+#include "NtupleManager.hh"
 
 #include "G4Run.hh"
 #include "G4UnitsTable.hh"
@@ -45,16 +46,16 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 RunAction::RunAction(DetectorConstruction* det, PrimaryGeneratorAction* kin)
-:G4UserRunAction(),fDetector(det), fPrimary(kin), fHistoManager(0)
+:G4UserRunAction(),fDetector(det), fPrimary(kin), fHistoManager(0), fNtupleManager(0)
 { 
-  fHistoManager = new HistoManager(); 
+  fNtupleManager = new NtupleManager();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 RunAction::~RunAction()
 { 
-  delete fHistoManager; 
+  delete fNtupleManager;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -86,10 +87,17 @@ void RunAction::BeginOfRunAction(const G4Run*)
 
   //histograms
   //
+  fNtupleManager->ImportLayers(fDetector);
+  fNtupleManager->Book();
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
-  if ( analysisManager->IsActive() ) {
-    analysisManager->OpenFile();
-  }
+  analysisManager->OpenFile();
+  // if ( analysisManager->IsActive() ) {
+  //   G4cout << "Active" << G4endl;
+  //   analysisManager->OpenFile();
+  // }
+  // else{
+  //   G4cout << "Inactive" << G4endl;
+  // }
 
   // show Rndm status
   CLHEP::HepRandom::showEngineStatus();
@@ -418,11 +426,13 @@ void RunAction::EndOfRunAction(const G4Run* aRun)
 
   //save histograms      
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();  
-  if ( analysisManager->IsActive() ) {
-    analysisManager->Write();
-    analysisManager->CloseFile();
-  }
+  // if ( analysisManager->IsActive() ) {
+  //   analysisManager->Write();
+  //   analysisManager->CloseFile();
+  // }
 
+  analysisManager->Write();
+  analysisManager->CloseFile();
   // show Rndm status
   CLHEP::HepRandom::showEngineStatus();
 }

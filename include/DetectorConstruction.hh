@@ -35,6 +35,9 @@
 
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
+#include "G4UnitsTable.hh"
+#include "G4SystemOfUnits.hh"
+#include <vector>
 
 class G4LogicalVolume;
 class G4Material;
@@ -51,37 +54,40 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
   public:
   
-     virtual G4VPhysicalVolume* Construct();
+  virtual G4VPhysicalVolume* Construct();
      
-     void SetSize     (G4double);              
-     void SetMaterial (const G4String&);
 
-     void UpdateGeometry();
+  void UpdateGeometry();
      
   public:
   
      const
-     G4VPhysicalVolume* GetWorld()      {return fPBox;};           
+     G4VPhysicalVolume* GetWorld()      {return worldPV;};           
                     
-     G4double           GetSize()       {return fBoxSize;};      
-     G4Material*        GetMaterial()   {return fMaterial;};
-     
-     void               PrintParameters();
-                       
+     G4double           GetSize();      
+     G4Material*        GetMaterial();
+     void Addlayer(G4String name, G4String pMaterial, G4double thickness);
+     void Addlayer(G4double thickness);
+     void ShiftPos(G4double dis) {fPos += dis;};
+     std::vector<G4String> GetLayerNames() {return LayerNames;};
+      void SetLayerName(G4String name) {fLayerName = name;};
+      void SetLayerMat(G4String mat) {fLayerMat = mat;};
   private:
   
-     G4VPhysicalVolume* fPBox;
-     G4LogicalVolume*   fLBox;
-     
-     G4double           fBoxSize;
-     G4Material*        fMaterial;     
-     
+     G4VPhysicalVolume* worldPV;
+     G4LogicalVolume*   worldLV;
+     G4int layer_count = 0;
      DetectorMessenger* fDetectorMessenger;
+     G4String fLayerName, fLayerMat;
+     
+     G4bool fCheckOverlaps=true;
+     std::vector<G4String> LayerNames;
 
   private:
     
      void               DefineMaterials();
      G4VPhysicalVolume* ConstructVolumes();     
+     G4double fPos = 0.0*mm;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

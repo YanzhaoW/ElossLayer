@@ -36,17 +36,18 @@
 #include "G4UserRunAction.hh"
 #include "G4VProcess.hh"
 #include "globals.hh"
+#include "DetectorConstruction.hh"
 #include <map>
-
+#include <vector>
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 class G4Run;
 class G4ParticleDefinition;
 class G4Material;
 
-class DetectorConstruction;
 class PrimaryGeneratorAction;
 class HistoManager;
+class NtupleManager;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -77,6 +78,8 @@ class RunAction : public G4UserRunAction
     void TotalEnergyDeposit (G4double energy);
 
     void EnergySpectrumOfSecondaries (G4String particleName, G4double ekin);
+    
+    std::vector<G4String> GetLayerNames() {return fDetector->GetLayerNames();};
 
   public:
     G4double GetEnergyFromRestrictedRange
@@ -102,6 +105,7 @@ private:
     DetectorConstruction*   fDetector;
     PrimaryGeneratorAction* fPrimary;
     HistoManager*           fHistoManager;
+    NtupleManager*          fNtupleManager;
 
     std::map<G4String,G4int>  fProcCounter;
 
