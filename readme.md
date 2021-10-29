@@ -63,6 +63,7 @@ The example above shows 6 layers in total being added with specification of thei
 * `/layer/SetName` : Set the name of the layer to be added next.
 * `/layer/SetMat` : Specify the material of the layer to be added next. The input string must be defined in the class method `DetectorConstruction::DefineMaterials()` inside the file "./src/DetectorConstruction.cc".
 * `/layer/AddLayer` : Set the thickness of the layer to be added next and add the layer to the geometry. The input parameter should be a number of type Double followed by a string for the lengh unit (either to be 'm', 'cm', 'mm' or 'um').
+
 Different layers are added back to back with no separation distance. To specify the separation distance between the last added layer and the next one, use the comand:
 * `/layer/shift` : The input parameter is of the same format as `/layer/AddLayer`.
 
